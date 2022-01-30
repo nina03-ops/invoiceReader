@@ -1,8 +1,4 @@
-import {
-  CosmosPartitionKey,
-  CosmosDateTime,
-  CosmosUniqueKey,
-} from '@nestjs/azure-database';
+import { CosmosPartitionKey, CosmosDateTime } from '@nestjs/azure-database';
 
 @CosmosPartitionKey('type')
 export class Invoice {
@@ -10,7 +6,6 @@ export class Invoice {
   provider: string;
   type: string;
 
-  // @CosmosUniqueKey() phoneNumber: string;
   @CosmosDateTime() createdAt?: Date;
   @CosmosDateTime() updatedAt?: Date;
 }

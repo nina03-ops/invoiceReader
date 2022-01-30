@@ -1,4 +1,4 @@
 export class CreateInvoiceDto {
-    provider: string;
-    type: string;
+  provider: string;
+  type: string;
 }

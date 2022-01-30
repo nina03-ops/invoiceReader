@@ -2,41 +2,30 @@ import {
   Controller,
   Post,
   Body,
-  Get,
-  Param,
-  Patch,
-  Delete,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { InvoiceService } from './invoice.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { StorageHandler } from 'storage.handler';
 
-@Controller('invoice')
+@Controller('/api/invoice')
 export class InvoiceController {
-  constructor(private readonly invoiceService: InvoiceService) {}
+  constructor(
+    private readonly invoiceService: InvoiceService,
+    private readonly storageHandler: StorageHandler,
+  ) {}
 
   @Post()
   create(@Body() createInvoiceDto: CreateInvoiceDto) {
     return this.invoiceService.create(createInvoiceDto);
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.invoiceService.findAll();
-  // }
-
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.invoiceService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateInvoiceDto: UpdateInvoiceDto) {
-  //   return this.invoiceService.update(+id, updateInvoiceDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.invoiceService.remove(+id);
-  // }
+  @Post('/upload-file')
+  @UseInterceptors(FileInterceptor('filename'))
+  async upload(@UploadedFile() file: Express.Multer.File): Promise<string> {
+    await this.storageHandler.uploadFile(file);
+    return 'uploaded';
+  }
 }
