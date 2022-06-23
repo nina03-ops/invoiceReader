@@ -7,9 +7,7 @@ export class StorageHandler {
     const blobServiceClient = BlobServiceClient.fromConnectionString(
       process.env.AZURE_STORAGE_CONNECTION_STRING,
     );
-    const blobContainer = blobServiceClient.getContainerClient(
-      process.env.AZURE_STORAGE_CONTAINER_NAME,
-    );
+    const blobContainer = blobServiceClient.getContainerClient(process.env.AZURE_STORAGE_CONTAINER_NAME);
     return blobContainer.getBlockBlobClient(filename);
   }
 
