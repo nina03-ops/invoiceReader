@@ -1,19 +1,12 @@
 import { FormRecognizerClient, AzureKeyCredential, FormField } from "@azure/ai-form-recognizer";
-import * as fs from "fs";
+import { CreateInvoiceDto } from "src/invoice/dto/create-invoice.dto";
 
-export default async function recognizeInvoices() {
-  // const invoiceUrl = process.env.INVOICE_URL;
+export default async function recognizeInvoices(invoiceUrl: string) {
   const apiKey = process.env.FORM_RECOGNIZER_SUBSCRIPTION_KEY;
   const endpoint = process.env.FORM_RECOGNIZER_ENDPOINT;
-  const fileName = "./sample_invoice.jpg";
-
-  //check filePath
-  if (!fs.existsSync(fileName)) {
-    throw new Error(`Expected file "${fileName}" to exist.`);
-  }
-  const readStream = fs.createReadStream(fileName);
   const client = new FormRecognizerClient(endpoint, new AzureKeyCredential(apiKey));
-  const poller = await client.beginRecognizeInvoices(readStream, {
+
+  const poller = await client.beginRecognizeInvoicesFromUrl(invoiceUrl, {
     onProgress: (state) => {
       console.log(`status: ${state.status}`);
     }
@@ -30,6 +23,15 @@ export default async function recognizeInvoices() {
     return `${name} (${valueType}): '${value}' with confidence ${confidence}'`;
   }
 
+  console.log("Invoice fields:");
+
+  const invoicedto: CreateInvoiceDto = {};
+
+  for (const [name, field] of Object.entries(invoice.fields)) {
+    if (field.valueType !== 'array' && field.valueType !== 'object') {
+      invoicedto[name] = field.value;
+    }
+  }
   for (const [name, field] of Object.entries(invoice.fields)) {
     if (field.valueType !== 'array' && field.valueType !== 'object') {
       console.log(`- ${name} ${fieldToString(field)}`);
@@ -65,8 +67,5 @@ export default async function recognizeInvoices() {
       ].join('\n'),
     );
   }
+  return invoicedto;
 }
-
-recognizeInvoices().catch((err) => {
-  console.error('The sample encountered an error:', err);
-});
